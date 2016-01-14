@@ -110,6 +110,8 @@ external vcpu_affinity_set : handle -> domid -> int -> bool array -> unit
   = "stub_xc_vcpu_setaffinity"
 external vcpu_affinity_get : handle -> domid -> int -> bool array
   = "stub_xc_vcpu_getaffinity"
+external node_affinity_set : handle -> domid -> bool array -> unit
+  = "stub_xc_node_setaffinity"
 external vcpu_context_get : handle -> domid -> int -> string
   = "stub_xc_vcpu_context_get"
 external sched_id : handle -> int = "stub_xc_sched_id"

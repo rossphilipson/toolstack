@@ -171,6 +171,9 @@ external vcpu_affinity_set: handle -> domid -> int -> bool array -> unit
 external vcpu_affinity_get: handle -> domid -> int -> bool array
        = "stub_xc_vcpu_getaffinity"
 
+external node_affinity_set: handle -> domid -> bool array -> unit
+       = "stub_xc_node_setaffinity"
+
 external vcpu_context_get: handle -> domid -> int -> string
        = "stub_xc_vcpu_context_get"
 

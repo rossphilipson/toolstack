@@ -475,6 +475,40 @@ CAMLprim value stub_xc_vcpu_getaffinity(value xch, value domid,
 	CAMLreturn(ret);
 }
 
+static int get_nodemap_len(value xch, value nodemap)
+{
+	int ml_len = Wosize_val(nodemap);
+	int xc_len = xc_get_max_nodes(_H(xch));
+
+	if (ml_len < xc_len)
+		return ml_len;
+	else
+		return xc_len;
+}
+
+CAMLprim value stub_xc_node_setaffinity(value xch, value domid, value nodemap)
+{
+	CAMLparam3(xch, domid, nodemap);
+	int i, len = get_nodemap_len(xch, nodemap);
+	xc_nodemap_t c_nodemap;
+	int retval;
+
+	c_nodemap = xc_nodemap_alloc(_H(xch));
+	if (c_nodemap == NULL)
+		failwith_xc(_H(xch));
+
+	for (i=0; i<len; i++) {
+		if (Bool_val(Field(nodemap, i)))
+			c_nodemap[i/8] |= 1 << (i&7);
+	}
+	retval = xc_vcpu_setaffinity(_H(xch), _D(domid), c_nodemap);
+	free(c_nodemap);
+
+	if (retval < 0)
+		failwith_xc(_H(xch));
+	CAMLreturn(Val_unit);
+}
+
 CAMLprim value stub_xc_sched_id(value xch)
 {
 	CAMLparam1(xch);
