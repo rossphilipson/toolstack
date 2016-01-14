@@ -578,6 +578,7 @@ let make_stubdom ~xc ~xs ~ioemuargs info uuid =
                 ; memory_video = 0L
 		; kernel = info.stubdom_kernel (* need path *)
 		; vcpus = 1
+		; numa_nodes = []
 		; priv = BuildPV
                        { cmdline = sprintf "%s %s" info.stubdom_cmdline argsstr
                        ; ramdisk = info.stubdom_initrd }
