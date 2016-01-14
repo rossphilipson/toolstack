@@ -501,7 +501,7 @@ CAMLprim value stub_xc_node_setaffinity(value xch, value domid, value nodemap)
 		if (Bool_val(Field(nodemap, i)))
 			c_nodemap[i/8] |= 1 << (i&7);
 	}
-	retval = xc_vcpu_setaffinity(_H(xch), _D(domid), c_nodemap);
+	retval = xc_domain_node_setaffinity(_H(xch), _D(domid), c_nodemap);
 	free(c_nodemap);
 
 	if (retval < 0)
