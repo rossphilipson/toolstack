@@ -56,6 +56,7 @@ type build_info = {
 	memory_video: int64;  (* memory video in megabytes *)
 	kernel: string;       (* in hvm case, point to hvmloader *)
 	vcpus: int;           (* vcpus max *)
+	numa_nodes: int list;
 	priv: builder_spec_info;
 }
 
