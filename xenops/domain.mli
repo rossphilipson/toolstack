@@ -183,10 +183,13 @@ val make_stubdom: xc: Xc.handle -> xs: Xs.xsh -> ioemuargs:string list -> stubdo
 val send_s3resume: xc: Xc.handle -> xs: Xs.xsh -> domid -> unit
 
 (** Set cpu affinity of some vcpus of a domain using an boolean array *)
-val node_affinity_set: xc: Xc.handle -> domid -> bool array -> unit
+val vcpu_affinity_set: xc: Xc.handle -> domid -> int -> bool array -> unit
 
 (** Get Cpu affinity of some vcpus of a domain *)
 val vcpu_affinity_get: xc: Xc.handle -> domid -> int -> bool array
+
+(** Set node affinity of a domain using an boolean array *)
+val node_affinity_set: xc: Xc.handle -> domid -> bool array -> unit
 
 (** Set number of cpu cores per socket *)
 val set_cores_per_socket: xc: Xc.handle -> domid -> int -> unit
