@@ -341,6 +341,9 @@ let vcpu_affinity_set ~xc domid vcpu cpumap =
 let vcpu_affinity_get ~xc domid vcpu =
 	Xc.vcpu_affinity_get xc domid vcpu
 
+let node_affinity_set ~xc domid nodemap =
+	Xc.node_affinity_set xc domid vcpu nodemap
+
 let set_cores_per_socket ~xc domid cores_per_socket =
 	Xc.domain_set_cores_per_socket xc domid cores_per_socket
 

@@ -799,7 +799,7 @@ let set_cpuid xc domid cfg =
 	with exn ->
 		warn "exception ignored during cpuid: %s" (Printexc.to_string exn)
 
-let set_affinity xc domid cfg =
+let set_vcpu_affinity xc domid cfg =
 	try
 		List.iter (fun (id, l) ->
 			let cpumap = Array.make 64 false in
@@ -812,7 +812,20 @@ let set_affinity xc domid cfg =
 			Domain.vcpu_affinity_set ~xc domid id cpumap
 		) cfg.cpus_affinity;
 	with exn ->
-		warn "exception ignored during affinity setting: %s" (Printexc.to_string exn)
+		warn "exception ignored during vcpu affinity setting: %s" (Printexc.to_string exn)
+
+let set_node_affinity xc domid cfg =
+	try
+		let nodemap = Array.make 64 false in
+		(* make the bitmap *)
+		List.iter (fun x ->
+			if x >= 0 && x < 64 then
+				nodemap.(x) <- true
+		) cfg.node_affinity;
+		(* and dump in into xen *)
+		Domain.node_affinity_set ~xc domid nodemap
+	with exn ->
+		warn "exception ignored during node affinity setting: %s" (Printexc.to_string exn)
 
 let set_cores_per_socket xc domid cfg =
 	match cfg.cores_per_socket with
@@ -1051,6 +1064,9 @@ let build_vm xc xs state f restore =
 	let cfg = state.vm_cfg in
 	let domid = state.vm_domid in
 	try
+		(* Set node affinity before allocating any resources *)
+		set_node_affinity xc domid cfg;
+
 		let dom_path = xs.Xs.getdomainpath domid in
 		Xs.transaction xs
 			(fun t ->
@@ -1065,7 +1081,7 @@ let build_vm xc xs state f restore =
 		);
 
 		set_cpuid xc domid cfg;
-		set_affinity xc domid cfg;
+		set_vcpu_affinity xc domid cfg;
 		set_cores_per_socket xc domid cfg;
 		if cfg.xciservice then (
 			info "extended service vm permissions enabled";
