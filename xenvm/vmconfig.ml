@@ -869,7 +869,7 @@ let of_file uuid error_report file =
 	] in
 	let kv k v =
 		match k with
-		| "disk" | "vif" | "nic" | "pci" | "cpuid" | "cpus-affinity"
+		| "disk" | "vif" | "nic" | "pci" | "cpuid" | "cpus-affinity" | "node-affinity"
 		| "extra-hvm" | "extra-local-watch" | "extra-vm-watch"
 		| "passthrough-io" | "passthrough-mmio" | "bios-string" | "platform" ->
 			cfg := list_add !cfg k v
