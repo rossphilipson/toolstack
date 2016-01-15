@@ -1036,7 +1036,6 @@ let build_info_of_cfg cfg =
 		Domain.memory_video = Int64.of_int (default 0 cfg.videoram);
 		Domain.kernel = kernel;
 		Domain.vcpus = cfg.vcpus;
-		Domain.numa_nodes = cfg.node_affinity;
 		Domain.priv = spec_info;
 	}
 
