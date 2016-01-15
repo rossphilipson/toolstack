@@ -191,6 +191,7 @@ type config = {
 	qemu_pv: bool;
 	cdrom_pt: string option;
 	cpus_affinity: (int * (int list)) list;
+	node_affinity: int list;
 	passthrough_ios: (int * int) list;
 	passthrough_mmios: (int64 * int64) list;
 	flask_label: string option;
@@ -722,6 +723,7 @@ let list_add cfg field value =
 	| "extra-local-watch" -> { cfg with extra_local_watches = cfg.extra_local_watches @ [ value ] }
 	| "extra-vm-watch"    -> { cfg with extra_vm_watches = cfg.extra_vm_watches @ [ value ] }
 	| "cpus-affinity"     -> { cfg with cpus_affinity = cfg.cpus_affinity @ [ config_cpus_affinity_of_string value ] }
+	| "node-affinity"     -> { cfg with node_affinity = cfg.node_affinity @ [ int_of_string value ] }
 	| "passthrough-io"    -> { cfg with passthrough_ios = cfg.passthrough_ios @ [ config_passthrough_io_of_string value ] }
 	| "passthrough-mmio"  -> { cfg with passthrough_mmios = cfg.passthrough_mmios @ [ config_passthrough_mmio_of_string value ] }
 	| "bios-string"       -> { cfg with bios_strings = cfg.bios_strings @ [ config_bios_string_of_string value ] }
@@ -807,6 +809,7 @@ let empty =
 		on_restart = ActionRestart;
 		on_crash = ActionDestroy;
 		cpus_affinity = [];
+		node_affinity = [];
 		passthrough_ios = [];
 		passthrough_mmios = [];
 		flask_label = None;
