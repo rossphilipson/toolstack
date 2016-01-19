@@ -21,7 +21,7 @@
 
 # Step 1:
 #
-# The following list specifies what NUMA node to set the VCPU affinity to for
+# The following list specifies what NUMA node to set the domain affinity to for
 # each of the listed VMs. This is just a sample configuration. The values are
 # of the form VMName:NUMANode. Any VMs not listed will not have any node
 # affinity set. The primary reason is to allow a guest to only use memory local
@@ -47,30 +47,6 @@ WinTPC6:1 WinTPC7:1 WinTPC8:1 WinTPC9:1 WinTPC10:1)
 # to zero will prevent the utility from changing dom0's default configuration.
 DOM0=4
 
-# Use utility to get the CPU:NODE mapping for the system
-CTON=(`./numautil -c`)
-
-function form_affinity_param() {
-     local value="cpus-affinity=$1:"
-     local first=""
-
-     for i in ${CTON[@]}; do
-         cpu=$(echo $i | cut -d\: -f1)
-         node=$(echo $i | cut -d\: -f2)
-
-         if [ "$node" == "$2" ]; then
-             if [ -z "$first" ]; then
-                 value="$value$cpu"
-                 first="no"
-             else
-                 value="$value,$cpu"
-             fi
-         fi
-     done
-
-     echo "$value"
-}
-
 function reset_extra_xenvm() {
     local value=""
 
@@ -93,18 +69,14 @@ function reset_extra_xenvm() {
 
 function set_extra_xenvm() {
     local value=`xec-vm -n $1 get extra-xenvm`
-    local vcpu=0
 
-    while [ $vcpu -lt $3 ]; do
-        affinity=$(form_affinity_param $vcpu $2)
+    affinity="node-affinity=$2"
 
-        if [ -z "$value" ]; then
-            value="$affinity"
-        else
-            value+=";$affinity"
-        fi
-        vcpu=$[$vcpu+1]
-    done
+    if [ -z "$value" ]; then
+        value="$affinity"
+    else
+        value+=";$affinity"
+    fi
 
     xec-vm -n $1 set extra-xenvm "$value"
     echo "Setting VM $1 to value $value"
@@ -125,13 +97,11 @@ function setup_dom0_vcpus() {
 for i in ${VMLIST[@]}; do
      vm=$(echo $i | cut -d\: -f1)
      node=$(echo $i | cut -d\: -f2)
-     vcpus=`xec-vm -n $vm get vcpus`
-     [ $vcpus -lt 1 ] && vcpus=1
-     echo "Setting node affinity for $vm with $vcpus vcpus to $node"
-     # Reset the extra-xenvm node, remove all cpus-affinity settings
+     echo "Setting node affinity for $vm to $node"
+     # Reset the extra-xenvm node, remove all node-affinity settings
      reset_extra_xenvm $vm
-     # Set the new CPU affinity configuration
-     set_extra_xenvm $vm $node $vcpus
+     # Set the new node affinity configuration
+     set_extra_xenvm $vm $node
 done
 
 # Setup the new dom0 VCPU configuration, remove previous settings
