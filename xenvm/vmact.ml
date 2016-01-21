@@ -473,6 +473,7 @@ let dm_info_of_cfg cfg =
 		Dm.stubdom_kernel = cfg.stubdom_kernel;
 		Dm.stubdom_initrd = cfg.stubdom_initrd;
 		Dm.stubdom_cmdline= cfg.stubdom_cmdline;
+		Dm.stubdom_node_affinity= cfg.stubdom_node_affinity;
 	}
 
 (* TODO: maybe unhardcode this? *)

@@ -201,6 +201,7 @@ type config = {
 	stubdom_kernel: string;
 	stubdom_initrd: string option;
 	stubdom_cmdline: string;
+	stubdom_node_affinity: int list;
 	qemu_dm_path: string;
 	qemu_dm_timeout: int;
 	bios_strings: (string*string) list;
@@ -726,6 +727,7 @@ let list_add cfg field value =
 	| "node-affinity"     -> { cfg with node_affinity = cfg.node_affinity @ [ int_of_string value ] }
 	| "passthrough-io"    -> { cfg with passthrough_ios = cfg.passthrough_ios @ [ config_passthrough_io_of_string value ] }
 	| "passthrough-mmio"  -> { cfg with passthrough_mmios = cfg.passthrough_mmios @ [ config_passthrough_mmio_of_string value ] }
+	| "stubdom-node-affinity" -> { cfg with stubdom_node_affinity = cfg.stubdom_node_affinity @ [ int_of_string value ] }
 	| "bios-string"       -> { cfg with bios_strings = cfg.bios_strings @ [ config_bios_string_of_string value ] }
 	| _             -> raise (Unknown_field field)
 
@@ -819,6 +821,7 @@ let empty =
 		stubdom_initrd = Some "/usr/lib/xen/boot/stubdomain-initramfs";
 		stubdom_kernel = "/usr/lib/xen/boot/stubdomain-bzImage";
 		stubdom_cmdline = "init=/init xen_blkfront.max=8";
+		stubdom_node_affinity = [];
 		qemu_dm_path = "";
 		qemu_dm_timeout = 30;
 		bios_strings = [];
@@ -871,7 +874,8 @@ let of_file uuid error_report file =
 		match k with
 		| "disk" | "vif" | "nic" | "pci" | "cpuid" | "cpus-affinity" | "node-affinity"
 		| "extra-hvm" | "extra-local-watch" | "extra-vm-watch"
-		| "passthrough-io" | "passthrough-mmio" | "bios-string" | "platform" ->
+		| "passthrough-io" | "passthrough-mmio" | "stubdom-node-affinity"
+		| "bios-string" | "platform" ->
 			cfg := list_add !cfg k v
 		| "on_halt"    -> cfg := { !cfg with on_halt    = action_of_string v }
 		| "on_restart" -> cfg := { !cfg with on_restart = action_of_string v }

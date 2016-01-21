@@ -346,6 +346,7 @@ let add_dm ~xs ~domid ~mem_max_kib ~vcpus ~boot =
 		Dm.stubdom_kernel = "";
 		Dm.stubdom_cmdline = "";
 		Dm.stubdom_initrd = None;
+		Dm.stubdom_node_affinity = [];
 	} in
 	Dm.start ~xs ~dmpath info domid
 

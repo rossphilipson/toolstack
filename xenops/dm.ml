@@ -63,6 +63,7 @@ type info = {
 	stubdom_kernel: string;
 	stubdom_initrd: string option;
 	stubdom_cmdline: string;
+	stubdom_node_affinity: int list;
 }
 
 (* Path to redirect qemu's stdout and stderr *)
@@ -248,7 +249,8 @@ let create_dm_stubdom ~xc ~xs dmargs info target_domid uuid =
 		         Domain_common.stubdom_memory = info.stubdom_memory;
 			 Domain_common.stubdom_kernel = info.stubdom_kernel;
 			 Domain_common.stubdom_initrd = info.stubdom_initrd;
-			 Domain_common.stubdom_cmdline= info.stubdom_cmdline } in
+			 Domain_common.stubdom_cmdline= info.stubdom_cmdline;
+			 Domain_common.stubdom_node_affinity= info.stubdom_node_affinity } in
 	let rec filter f l = match l with [] -> [] | x::xs -> if f x then filter f xs else x :: filter f xs in
 	let filtered_args = filter (fun x -> x = "xenfv" || x = "-M" || x = "-sdl") dmargs in
 	let stubdom_domid = Domain_common.make_stubdom ~xc ~xs ~ioemuargs:filtered_args stubinfo uuid in

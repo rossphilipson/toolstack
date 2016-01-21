@@ -65,6 +65,7 @@ type stubdom_info = {
 	stubdom_kernel: string;
 	stubdom_initrd: string option;
 	stubdom_cmdline: string;
+	stubdom_node_affinity: int list;
 }
 
 type domarch = Arch_HVM | Arch_native | Arch_X64 | Arch_X32
