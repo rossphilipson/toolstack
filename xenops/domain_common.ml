@@ -556,6 +556,19 @@ let send_s3resume ~xc ~xs domid =
 	Xc.domain_send_s3resume xc domid;
 	xs.Xs.write (xs.Xs.getdomainpath domid ^ "/wakeup-req") "1"
 
+let stubdom_set_node_affinity ~xc domid nodes =
+	try
+		let nodemap = Array.make 64 false in
+		(* make the bitmap *)
+		List.iter (fun x ->
+			if x >= 0 && x < 64 then
+				nodemap.(x) <- true
+		) nodes;
+		(* and dump in into xen *)
+		Xc.node_affinity_set xc domid nodemap
+	with exn ->
+		warn "exception ignored during stubdom node affinity setting: %s" (Printexc.to_string exn)
+
 let make_stubdom ~xc ~xs ~ioemuargs info uuid =
       let ssidref =
 	      try
@@ -584,6 +597,9 @@ let make_stubdom ~xc ~xs ~ioemuargs info uuid =
 		} in
 	let stubdom_domid = make ~xc ~xs createinfo uuid in
 	try (
+
+	stubdom_set_node_affinity ~xc stubdom_domid info.stubdom_node_affinity;
+
 	build ~xc ~xs buildinfo stubdom_domid;
 
 	(* write to the target where it can find it stubdom *)
