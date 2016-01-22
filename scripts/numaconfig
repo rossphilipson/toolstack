@@ -134,7 +134,7 @@ function numa_reset() {
     cat /boot/system/grub/tmp.cfg > /boot/system/grub/grub.cfg
 }
 
-function numa_dispay() {
+function numa_display() {
     for i in ${VMLIST[@]}; do
         vm=$(echo $i | cut -d\: -f1)
         value=`xec-vm -n $vm get extra-xenvm`
@@ -159,15 +159,15 @@ case $OPTION in
         exit
         ;;
     r)
-        echo "Reset"
+        numa_reset
         exit
         ;;
     l)
-        echo "List"
+        numa_display
         exit
         ;;
     *)
-        echo "Usage"
+        numa_usage
         exit
         ;;
 esac
