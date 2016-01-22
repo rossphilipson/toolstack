@@ -148,7 +148,7 @@ function numa_display() {
 function numa_usage() {
     echo "Usage: -s  Setup NUMA affinity configuration"
     echo "       -r  Reset and remove NUMA affinity configuration"
-    echo "Usage: -l  Display NUMA affinity configuration"
+    echo "       -l  Display NUMA affinity configuration"
 }
 
 getopts "srl" OPTION
