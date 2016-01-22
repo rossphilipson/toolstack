@@ -8,10 +8,12 @@
 # $ setenforcing 0
 #
 # If any of the VMs are NDVMs, the configuration files must be modified to
-# allow the VMs configurations to be edited. This is done by editing
-# /config/vms/00000000-0000-0000-0000-000000000002.db and setting
-# "modify-vm-settings" to "true". After this is done the dbd must be told to
-# reload settings like this:
+# allow the VMs configurations to be edited. This is an example on OpenXT
+# With one NDVM. The same would be done for other NDVMs and the UIVM.
+#
+# Start by editing /config/vms/00000000-0000-0000-0000-000000000002.db and
+# setting "modify-vm-settings" to "true". After this is done the dbd must be
+# told to reload settings like this:
 #
 # $ kill -SIGHUP <pid-of-dbd>
 #
@@ -35,7 +37,7 @@
 # be in node 0). So it makes sense to assign the Network VM to that node since
 # it has the integrated NICs assigned to it (those devices being on the PCI(e)
 # bus on the PCH).
-VMLIST=(Win7VM1:1:1 Win7VM2:1:1 Win7VM3:1:1 Win7VM4:1:1 Network:0
+VMLIST=(Win7VM1:1:1 Win7VM2:1:1 Win7VM3:1:1 Win7VM4:1:1 Network:0 uivm:0
 WinTPC1:0:0 WinTPC2:0:0 WinTPC3:0:0 WinTPC4:0:0 WinTPC5:0:0
 WinTPC6:1:0 WinTPC7:1:1 WinTPC8:1:1 WinTPC9:1:1 WinTPC10:1:1)
 
@@ -141,17 +143,18 @@ function numa_display() {
         echo "$vm extra-xenvm: $value"
     done
 
-    echo "dom0 cmdline:"
+    echo ""
+    echo "DOM0 cmdline:"
     sed -n '/XEN_COMMON_CMD=/p' /boot/system/grub/grub.cfg
 }
 
 function numa_usage() {
     echo "Usage: -s  Setup NUMA affinity configuration"
     echo "       -r  Reset and remove NUMA affinity configuration"
-    echo "       -l  Display NUMA affinity configuration"
+    echo "       -d  Display NUMA affinity configuration"
 }
 
-getopts "srl" OPTION
+getopts "srd" OPTION
 
 case $OPTION in
     s)
@@ -162,7 +165,7 @@ case $OPTION in
         numa_reset
         exit
         ;;
-    l)
+    d)
         numa_display
         exit
         ;;
