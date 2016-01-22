@@ -101,18 +101,74 @@ function setup_dom0_vcpus() {
     fi
 }
 
-# Process the VM list
-for i in ${VMLIST[@]}; do
-     vm=$(echo $i | cut -d\: -f1)
-     node=$(echo $i | cut -d\: -f2)
-     stub_node=$(echo $i | cut -d\: -f3)
-     echo "Setting node affinity for $vm to $node and stubdom to $stub_node"
-     # Reset the extra-xenvm node, remove all node-affinity settings
-     reset_extra_xenvm $vm
-     # Set the new node affinity configuration
-     set_extra_xenvm $vm $node $stub_node
-done
+function numa_setup() {
+    # Process the VM list
+    for i in ${VMLIST[@]}; do
+        vm=$(echo $i | cut -d\: -f1)
+        node=$(echo $i | cut -d\: -f2)
+        stub_node=$(echo $i | cut -d\: -f3)
+        echo "Setting node affinity for $vm to $node and stubdom to $stub_node"
+        # Reset the extra-xenvm node, remove all node-affinity settings
+        reset_extra_xenvm $vm
+        # Set the new node affinity configuration
+        set_extra_xenvm $vm $node $stub_node
+    done
 
-# Setup the new dom0 VCPU configuration, remove previous settings
-setup_dom0_vcpus
+    # Setup the new dom0 VCPU configuration, remove previous settings
+    setup_dom0_vcpus
+}
+
+function numa_reset() {
+    for i in ${VMLIST[@]}; do
+        vm=$(echo $i | cut -d\: -f1)
+        echo "Removing node affinity for $vm"
+        # Reset the extra-xenvm node, remove all node-affinity settings
+        reset_extra_xenvm $vm
+    done
+
+    echo "Removing dom0 node affinity"
+
+    [ ! -f /boot/system/grub/grub.orig ] && cp /boot/system/grub/grub.cfg /boot/system/grub/grub.orig
+
+    cat /boot/system/grub/grub.cfg | sed 's/dom0_max_vcpus=[[:digit:]]\+ \?//g' | sed 's/dom0_vcpus_pin \?//g' > /boot/system/grub/tmp.cfg
+    cat /boot/system/grub/tmp.cfg > /boot/system/grub/grub.cfg
+}
+
+function numa_dispay() {
+    for i in ${VMLIST[@]}; do
+        vm=$(echo $i | cut -d\: -f1)
+        value=`xec-vm -n $vm get extra-xenvm`
+        echo "$vm extra-xenvm: $value"
+    done
+
+    echo "dom0 cmdline:"
+    sed -n '/XEN_COMMON_CMD=/p' /boot/system/grub/grub.cfg
+}
+
+function numa_usage() {
+    echo "Usage: -s  Setup NUMA affinity configuration"
+    echo "       -r  Reset and remove NUMA affinity configuration"
+    echo "Usage: -l  Display NUMA affinity configuration"
+}
+
+getopts "srl" OPTION
+
+case $OPTION in
+    s)
+        numa_setup
+        exit
+        ;;
+    r)
+        echo "Reset"
+        exit
+        ;;
+    l)
+        echo "List"
+        exit
+        ;;
+    *)
+        echo "Usage"
+        exit
+        ;;
+esac
 
