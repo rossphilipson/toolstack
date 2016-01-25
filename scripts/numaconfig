@@ -7,15 +7,22 @@
 # $ nr
 # $ setenforcing 0
 #
-# If any of the VMs are NDVMs, the configuration files must be modified to
-# allow the VMs configurations to be edited. This is an example on OpenXT
-# With one NDVM. The same would be done for other NDVMs and the UIVM.
+# If any of the VMs are NDVMs or the UIVM, the configuration files must be
+# modified to# allow the VMs configurations to be edited. This is an example on
+# OpenXT with one NDVM. The same would be done for other NDVMs and the UIVM.
 #
 # Start by editing /config/vms/00000000-0000-0000-0000-000000000002.db and
 # setting "modify-vm-settings" to "true". After this is done the dbd must be
 # told to reload settings like this:
 #
 # $ kill -SIGHUP <pid-of-dbd>
+#
+# Xenmgr also has a "feature" that overwrites the NDVM and UIVM configs on
+# every reboot. This has to be disabled to set affinity for these VMs. To
+# do this:
+#
+# $ db-write /xenmgr/overwrite-ndvm-settings false
+# $ db-write /xenmgr/overwrite-uivm-settings false
 #
 # Then setup the configuration below (Steps 1 and 2) for the system in
 # question and run the script. Note this will change the system measurements
