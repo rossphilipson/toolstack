@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Use this utility to setup NUMA node affinity on the OpenXT platform. To use
-# it, copy this file and the numautil binary found in ../bin to a location on
-# the OpenXT system (e.g. /storage). SELinux mush be disabled to use this:
+# it, copy this file to a location on the OpenXT system (e.g. /storage).
+# SELinux mush be disabled to use this:
 #
 # $ nr
 # $ setenforcing 0
