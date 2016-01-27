@@ -28,8 +28,8 @@
 # $ db-write /xenmgr/overwrite-uivm-settings false
 #
 # Then setup the configurations below (Steps 1 and 2) for the system in
-# question and run the script. Running the numaconfig script w/o any arguments
-# will display the usage options.
+# question and run the script. Running the numaconfig script with -h will
+# display the usage options.
 
 # Step 1:
 #

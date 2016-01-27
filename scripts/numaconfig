@@ -100,11 +100,14 @@ function numa_usage() {
     echo "Usage: -s  <config-file> Setup NUMA affinity configuration"
     echo "       -r  <config-file> Reset and remove NUMA affinity configuration"
     echo "       -d  <config-file> Display NUMA affinity configuration"
+    echo "       -h  Display this message"
 }
 
-getopts "s:r:d:" OPTION
+getopts "s:r:d:h" OPTION
 
-. $OPTARG
+if [ -n "$OPTARG" ]; then
+    . $OPTARG
+fi
 
 case $OPTION in
     s)
@@ -119,6 +122,7 @@ case $OPTION in
         numa_display
         exit
         ;;
+    h)  ;&
     *)
         numa_usage
         exit
