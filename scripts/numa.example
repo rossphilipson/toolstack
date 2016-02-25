@@ -1,35 +1,25 @@
 #!/bin/bash
 
 # Use this NUMA configuration example file and the numaconfig utility to
-# setup NUMA node affinity on the OpenXT platform. First copy this file to a
-# location on the OpenXT system (e.g. /storage). This will allow customizing of
-# the VM list and Dom0 settings below.
-#
-# Use of the numaconfig utility must be done using the sysadm_t role. From a
-# terminal the role can be assumed using:
+# setup NUMA node affinity on the OpenXT platform. Use of the numaconfig
+# utility must be done using the sysadm_t role. From a terminal the role can
+# be assumed using:
 #
 # $ nr
 #
-# If any of the VMs are NDVMs or the UIVM, the configuration files must be
-# modified to allow the VMs configurations to be edited. This is an example on
-# OpenXT with one NDVM. The same would be done for other NDVMs and the UIVM.
+# For a list of options for this utility:
 #
-# Start by editing /config/vms/00000000-0000-0000-0000-000000000002.db and
-# setting "modify-vm-settings" to "true". After this is done the dbd must be
-# told to reload settings like this:
+# $ numaconfig -h
 #
-# $ kill -SIGHUP <pid-of-dbd>
+# NOTE: SELinux does not need to be switched to Permissive mode.
 #
-# Xenmgr also has a "feature" that overwrites the NDVM and UIVM configs on
-# every reboot. This has to be disabled to set affinity for these VMs. To
-# do this:
+# NOTE: This utility will disable the overwrite-ndvm-settings and
+# overwrite-uivm-settings settings which are enabled by default in the
+# toolstack.
 #
-# $ db-write /xenmgr/overwrite-ndvm-settings false
-# $ db-write /xenmgr/overwrite-uivm-settings false
+# NOTE: Using the reset option, all affinities will be removed, DOM0 command
+# line will be restored and the toolstack overwrite settings re-enabled.
 #
-# Then setup the configurations below (Steps 1 and 2) for the system in
-# question and run the script. Running the numaconfig script with -h will
-# display the usage options.
 
 # Step 1:
 #

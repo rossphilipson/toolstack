@@ -114,14 +114,14 @@ function numa_reset() {
 function numa_display() {
     local i
 
+    echo "######## VMS ########"
     for i in ${VMLIST[@]}; do
         local vm=$(echo $i | cut -d\: -f1)
         local value=`xec-vm -n $vm get extra-xenvm`
         echo "$vm extra-xenvm: $value"
     done
 
-    echo ""
-    echo "DOM0 cmdline:"
+    echo "######## DOM0 ########"
     sed -n '/XEN_COMMON_CMD=/p' /boot/system/grub/grub.cfg
 }
 
