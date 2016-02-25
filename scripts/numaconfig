@@ -1,7 +1,19 @@
 #!/bin/bash
 
+function modify_special_vm() {
+    local type=`xec-vm -n $1 get type`
+    local uuid=`xec-vm -n $1 get uuid`
+
+    if [ $type == "ndvm" ]; then
+        db-write /vm/$uuid/policies/modify-vm-settings $2
+    elif [ $type == "uivm" ]; then
+        db-write /vm/$uuid/policies/modify-vm-settings $2
+    fi
+}
+
 function reset_extra_xenvm() {
     local value=""
+    local substr
 
     IFS=';' read -r -a subarr <<< "`xec-vm -n $1 get extra-xenvm`"
 
@@ -17,13 +29,12 @@ function reset_extra_xenvm() {
     done
 
     xec-vm -n $1 set extra-xenvm "$value"
-    echo "Reset VM $1 to value $value"
+    echo "Reset VM $1 to value: $value"
 }
 
 function set_extra_xenvm() {
     local value=`xec-vm -n $1 get extra-xenvm`
-
-    affinity="node-affinity=$2"
+    local affinity="node-affinity=$2"
 
     if [ -z "$value" ]; then
         value="$affinity"
@@ -40,7 +51,30 @@ function set_extra_xenvm() {
     echo "Setting VM $1 to value $value"
 }
 
-function setup_dom0_vcpus() {
+function numa_setup() {
+    local i
+
+    # Disable xenmgr overwrite of uivm/ndvm configs
+    db-write /xenmgr/overwrite-ndvm-settings false
+    db-write /xenmgr/overwrite-uivm-settings false
+
+    # Process the VM list
+    for i in ${VMLIST[@]}; do
+        local vm=$(echo $i | cut -d\: -f1)
+        local node=$(echo $i | cut -d\: -f2)
+        local stub_node=$(echo $i | cut -d\: -f3)
+        echo "Setting node affinity for $vm to $node and stubdom to $stub_node"
+        # Prepare special VMs to allow modifications
+        modify_special_vm $vm true
+        # Reset the extra-xenvm node, remove all node-affinity settings
+        reset_extra_xenvm $vm
+        # Set the new node affinity configuration
+        set_extra_xenvm $vm $node $stub_node
+        # Reset special VMs to disallow modifications
+        modify_special_vm $vm false
+    done
+
+    # Setup the new dom0 VCPU configuration, remove previous settings
     echo "Setup dom0 with $DOM0 vcpus"
 
     if [ $DOM0 -gt 0 ]; then
@@ -51,29 +85,18 @@ function setup_dom0_vcpus() {
     fi
 }
 
-function numa_setup() {
-    # Process the VM list
-    for i in ${VMLIST[@]}; do
-        vm=$(echo $i | cut -d\: -f1)
-        node=$(echo $i | cut -d\: -f2)
-        stub_node=$(echo $i | cut -d\: -f3)
-        echo "Setting node affinity for $vm to $node and stubdom to $stub_node"
-        # Reset the extra-xenvm node, remove all node-affinity settings
-        reset_extra_xenvm $vm
-        # Set the new node affinity configuration
-        set_extra_xenvm $vm $node $stub_node
-    done
-
-    # Setup the new dom0 VCPU configuration, remove previous settings
-    setup_dom0_vcpus
-}
-
 function numa_reset() {
+    local i
+
     for i in ${VMLIST[@]}; do
-        vm=$(echo $i | cut -d\: -f1)
+        local vm=$(echo $i | cut -d\: -f1)
         echo "Removing node affinity for $vm"
+        # Prepare special VMs to allow modifications
+        modify_special_vm $vm true
         # Reset the extra-xenvm node, remove all node-affinity settings
         reset_extra_xenvm $vm
+        # Reset special VMs to disallow modifications
+        modify_special_vm $vm false
     done
 
     echo "Removing dom0 node affinity"
@@ -82,12 +105,18 @@ function numa_reset() {
 
     cat /boot/system/grub/grub.cfg | sed 's/dom0_max_vcpus=[[:digit:]]\+ \?//g' | sed 's/dom0_vcpus_pin \?//g' > /boot/system/grub/tmp.cfg
     cat /boot/system/grub/tmp.cfg > /boot/system/grub/grub.cfg
+
+    # Enable xenmgr overwrite of uivm/ndvm configs
+    db-write /xenmgr/overwrite-ndvm-settings true
+    db-write /xenmgr/overwrite-uivm-settings true
 }
 
 function numa_display() {
+    local i
+
     for i in ${VMLIST[@]}; do
-        vm=$(echo $i | cut -d\: -f1)
-        value=`xec-vm -n $vm get extra-xenvm`
+        local vm=$(echo $i | cut -d\: -f1)
+        local value=`xec-vm -n $vm get extra-xenvm`
         echo "$vm extra-xenvm: $value"
     done
 
